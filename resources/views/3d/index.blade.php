@@ -25,11 +25,25 @@
         }
 
         .page {
-            width: 400px;
-            height: 500px;
-            background: white;
-            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 5px 5px 15px rgba(0,0,0,0.2);
+            transform-origin: left center;
+            transition: transform 1.2s ease;
+            background: #fff;
+            border-radius: 4px;
         }
+
+
+        /*.page {*/
+        /*    width: 400px;*/
+        /*    height: 500px;*/
+        /*    background: white;*/
+        /*    overflow: hidden;*/
+        /*}*/
+
+        .page:hover {
+            transform: rotateY(-3deg) scale(1.01);
+        }
+
 
         body.dark .page {
             background: #333;

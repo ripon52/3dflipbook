@@ -1,7 +1,7 @@
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-    const pdfUrl = "{{ asset('books/laraveltips.pdf') }}"; // Laravel path
+    const pdfUrl = "{{ asset('books/laravelbeyond.pdf') }}"; // Laravel path
     let autoFlipInterval = null;
     let totalPages = 0;
     let currentZoom = 1.5;
