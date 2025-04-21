@@ -1,0 +1,180 @@
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const pdfUrl = "{{ asset('books/laraveltips.pdf') }}"; // Laravel path
+    let autoFlipInterval = null;
+    let totalPages = 0;
+    let currentZoom = 1.5;
+
+    async function renderPDF() {
+
+        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        totalPages = pdf.numPages;
+
+        document.getElementById('page-slider').max = totalPages;
+
+
+        const flipbook = document.getElementById('flipbook');
+        flipbook.innerHTML = ''; // Clear
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: currentZoom });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            await page.render({ canvasContext: context, viewport }).promise;
+
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL();
+            img.classList.add('page');
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('page');
+            wrapper.appendChild(img);
+
+            flipbook.appendChild(wrapper);
+        }
+
+        $('#flipbook').turn({
+            width: 800,
+            height: 500,
+            autoCenter: true,
+            acceleration: true,
+            gradients: true,
+            elevation: 50,
+            duration: 1000,
+            when: {
+                turning: function(event, page) {
+                    updatePageIndicator(page);
+                },
+                turned: function(event, page) {
+                    updatePageIndicator(page);
+                }
+            }
+        });
+
+        updatePageIndicator(1);
+        document.getElementById('preloader').style.display = 'none';
+    }
+
+    function nextPage() {
+        $('#flipbook').turn('next');
+    }
+
+    function prevPage() {
+        $('#flipbook').turn('previous');
+    }
+
+    function startAutoFlip() {
+        if (autoFlipInterval) return;
+        autoFlipInterval = setInterval(() => {
+            $('#flipbook').turn('next');
+        }, 3000);
+    }
+
+    function stopAutoFlip() {
+        clearInterval(autoFlipInterval);
+        autoFlipInterval = null;
+    }
+
+    function toggleFullscreen() {
+        const elem = document.getElementById("flipbook");
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => console.log(err));
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function zoomIn() {
+        if (currentZoom < 3) {
+            currentZoom += 0.2;
+            reloadPDF();
+        }
+    }
+
+    function zoomOut() {
+        if (currentZoom > 1) {
+            currentZoom -= 0.2;
+            reloadPDF();
+        }
+    }
+
+    function reloadPDF() {
+        $('#flipbook').turn('destroy').empty();
+        renderPDF();
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark');
+    }
+
+    $(document).ready(() => renderPDF());
+
+
+    // Zoom In/Out
+    // Function to handle zoom
+    let zoomLevel = 1;
+    const zoomStep = 0.1; // Adjust for finer control
+    const maxZoom = 2; // Max zoom level
+    const minZoom = 0.5; // Min zoom level
+
+    // Mouse wheel zoom
+    $(document).on('wheel', function (event) {
+        if (event.ctrlKey) {
+            // Prevent page scrolling if Ctrl is held
+            event.preventDefault();
+
+            if (event.originalEvent.deltaY > 0 && zoomLevel > minZoom) {
+                zoomLevel -= zoomStep; // Zoom out
+            } else if (event.originalEvent.deltaY < 0 && zoomLevel < maxZoom) {
+                zoomLevel += zoomStep; // Zoom in
+            }
+
+            // Apply zoom to flipbook
+            $('#flipbook').css('transform', `scale(${zoomLevel})`);
+        }
+    });
+
+    // Right Click Protection
+    // document.addEventListener('contextmenu', event => event.preventDefault());
+
+
+    // Page slider control
+    document.getElementById('page-slider').addEventListener('input', function () {
+        const page = parseInt(this.value);
+        $('#flipbook').turn('page', page);
+    });
+
+    // Sync slider with turning page
+    function updatePageIndicator(page) {
+        document.getElementById('page-indicator').innerText = `Page ${page} / ${totalPages}`;
+        document.getElementById('page-slider').value = page;
+    }
+
+
+    // Arrow Key Next and Prev
+    $(document).on('keydown', function (e) {
+        console.log("Key Pressed", e.key);
+
+        if ($('#flipbook').data('turn')) {
+            if (e.key === "ArrowRight") {
+                $('#flipbook').turn('next');
+            } else if (e.key === "ArrowLeft") {
+                $('#flipbook').turn('previous');
+            }
+            else if (e.key === "PageDown") {
+                $('#flipbook').turn('next');
+            } else if (e.key === "PageUp") {
+                $('#flipbook').turn('previous');
+            }
+
+        }
+    });
+
+
+
+</script>

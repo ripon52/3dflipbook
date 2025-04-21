@@ -1,0 +1,13 @@
+<?php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProductController;
+
+Route::get('/3d', [PageController::class, 'book3D']);
+Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/products', [ProductController::class, 'products'])->name('products');
+Route::get('/products/{id}', [PageController::class, 'productDetails'])->name('product.details');
+
+// API routes for dynamic loading
+Route::get('/api/products', [PageController::class, 'getProducts']);
+Route::get('/api/products/{id}', [PageController::class, 'getProductDetails']);
