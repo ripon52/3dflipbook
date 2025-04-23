@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Booth;
+use Illuminate\Http\Request;
+
+class BoothController extends Controller
+{
+    public function index(Request $request)
+    {
+        $booths = Booth::all();
+
+        return view("booth.index")->with(["booths" => $booths]);
+    }
+
+    public function create(Request $request)
+    {
+
+        return view("booth.create");
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string|unique:booths,code',
+            'coords' => 'required|string',
+            'shape' => 'required|in:rect,circle,poly',
+            'status' => 'nullable|string',
+            'description' => 'nullable|string',
+        ]);
+
+        Booth::create($request->only([
+            'code', 'coords', 'shape', 'status', 'description'
+        ]));
+
+        return response()->json(['success' => true]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $booth = Booth::findOrFail($id);
+        $booth->coords = $request->coords;
+        $booth->save();
+
+        return response()->json(['success' => true, 'coords' => $request->coords]);
+    }
+}

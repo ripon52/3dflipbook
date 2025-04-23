@@ -3,85 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>SPA jQuery</title>
+    <title>{{ config('app.name', 'Laravel Admin') }}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Styles (optional) -->
     <style>
-        .loading {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-weight: bold;
-            font-size: 18px;
+        body {
+            background-color: #f8f9fa;
         }
-        nav a.active { font-weight: bold; }
+        .booth-map-container {
+            position: relative;
+            overflow: auto;
+        }
+        .booth-button {
+            position: absolute;
+            cursor: pointer;
+            opacity: 0.85;
+        }
     </style>
+
+    @stack('styles')
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url('/') }}">{{ config('app.name', 'Admin') }}</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-<nav>
-    <a href="{{ route('home') }}" class="nav-link">Home</a> |
-    <a href="{{ route('products') }}" class="nav-link">Browse Products</a>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Left side -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+{{--                    <a href="{{ route('booths.index') }}" class="nav-link">Booths</a>--}}
+                </li>
+            </ul>
+
+            <!-- Right side -->
+            <ul class="navbar-nav ms-auto">
+                @guest
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Login</a>
+                    </li>
+                @else
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            {{ Auth::user()->name }}
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    Logout
+                                </a>
+                            </li>
+                        </ul>
+
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
+                    </li>
+                @endguest
+            </ul>
+        </div>
+    </div>
 </nav>
 
-<div class="loading" id="loading">Loading...</div>
-
-<div id="main-content">
+<main class="py-4">
     @yield('content')
-</div>
+</main>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    function setActiveNav(url) {
-        $('nav a').removeClass('active');
-        $('nav a[href="' + url + '"]').addClass('active');
-    }
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    function loadPage(url, push = true) {
-        $('#loading').show();
-
-        $.ajax({
-            url: url,
-            type: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function (data) {
-
-                console.log("Data loaded successfully: " , data);
-
-                let mainContentHtml = $(data).find('#main-content').html();
-                console.log("Main Content HTML ", mainContentHtml);
-
-                $('#main-content').html(data);
-
-                if (push) {
-                    history.pushState(null, '', url);
-                }
-
-                setActiveNav(url);
-            },
-            error: function () {
-                alert('Failed to load content.');
-            },
-            complete: function () {
-                $('#loading').hide();
-            }
-        });
-    }
-
-    $(document).on('click', 'a.nav-link, a.ajax-link', function (e) {
-        const url = $(this).attr('href');
-        if (url.startsWith(window.location.origin)) {
-            e.preventDefault();
-            loadPage(url);
-        }
-    });
-
-    window.onpopstate = function () {
-        loadPage(location.pathname + location.search, false);
-    };
-</script>
+@yield('scripts')
 </body>
 </html>
