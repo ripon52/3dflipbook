@@ -4,3 +4,4 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 
 Route::get('/', [PageController::class, 'book3D'])->name('home');
+Route::get('/wowbook', [PageController::class, 'wowbook']);

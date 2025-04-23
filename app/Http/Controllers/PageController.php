@@ -14,44 +14,9 @@ class PageController extends Controller
         return view('3d.index');
     }
 
-    // Root page
-    public function home()
+    public function wowbook(Request $request)
     {
-        return view('pages.home'); // Home page view
+
+        return view('wowbook.index');
     }
-
-    // Products page with AJAX support
-    public function products(Request $request)
-    {
-        $products = Product::paginate(10); // Paginated products
-
-        if ($request->ajax()) {
-            return view('products', compact('products'))->renderSections()['content'];
-        }
-
-        return view('pages.products', compact('products'));
-    }
-
-    // Product details page
-    public function productDetails($id)
-    {
-        $product = Product::findOrFail($id);
-
-        return view('pages.product-details', compact('product'))->renderSections()['content'];
-    }
-
-    // API route for products
-    public function getProducts(Request $request)
-    {
-        $products = Product::paginate(10); // Paginated products
-        return response()->json($products);
-    }
-
-    // API route for product details
-    public function getProductDetails($id)
-    {
-        $product = Product::findOrFail($id);
-        return response()->json($product);
-    }
-
 }
